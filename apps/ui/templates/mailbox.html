@@ -1,0 +1,76 @@
+{% extends 'include/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %} 
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Inbox</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Inbox</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card card-primary card-outline">
+            <div class="card-header">
+              <h3 class="card-title">Inbox</h3>
+              {% for message in messages %}
+                  <div class="alert {{ message.tags }} alert-dismissible">
+                      <button type="button" class="close" data-dismiss="alert"
+                              aria-label="Close">
+                      </button>
+                      {{ message }}
+                  </div>
+                  {% endfor %}
+              <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+              <div class="table-responsive mailbox-messages">
+                <table class="table table-hover table-striped">
+                  <tbody>
+                    {% for rec in email_digests %}
+                  <tr>
+                    <td class="mailbox-name"><a href="{% url 'apps.ui:readmail' rec.id %}">{{ rec.summary|truncatechars:50 }}</a></td>
+                    <td class="mailbox-attachment"></td>
+                    <td class="mailbox-date">{{ rec.created_at|naturaltime}}</td>
+                    <td>
+                      <div class="tools">
+                        <a href="{% url 'apps.ui:deletemail' rec.id %}"><i class="fas fa-trash"></i></a>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                  
+                  </tbody>
+                </table>
+                <!-- /.table -->
+              </div>
+              <!-- /.mail-box-messages -->
+            </div>
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  {% endblock %}

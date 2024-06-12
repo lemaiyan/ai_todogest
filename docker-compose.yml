@@ -1,0 +1,99 @@
+version: '3.8'
+services:
+  app:
+    environment:
+      - DB_NAME=$DB_NAME
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_USER=$DB_USER
+      - DB_HOST=$DB_HOST
+      - DB_PORT=$DB_PORT
+      - CHAT_GPT_KEY=$CHAT_GPT_KEY
+      - GOOGLE_SSO_CLIENT_ID=$GOOGLE_SSO_CLIENT_ID
+      - GOOGLE_SSO_CLIENT_SECRET=$GOOGLE_SSO_CLIENT_SECRET
+      - GOOGLE_SSO_PROJECT_ID=$GOOGLE_SSO_PROJECT_ID
+      - DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+    build: .
+    command: ["/bin/bash", "./run.sh"]
+    depends_on:
+      - db
+    volumes:
+      - ./:/usr/src/app
+      - static_volume:/usr/src/app/static
+      - .credentials/:/root/.credentials
+    expose:
+      - 80
+    ports:
+      - 3000:3000
+    links:
+      - db
+  nginx:
+    build: ./nginx
+    ports:
+    - '80:80'
+    - '4431:443'
+    volumes:
+      - static_volume:/usr/src/app/static
+    depends_on:
+      - app
+
+  db:
+    image: postgres:16.0-alpine
+    environment:
+      - POSTGRES_DB=$DB_NAME
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+    volumes:
+      - /var/lib/postgresql/data
+
+  rabbitmq:
+    image: gonkulatorlabs/rabbitmq:3.6.1 #this has management plugin enabled
+    ports:
+      - 15672:15672
+      - 5671:5671
+      - 5672:5672
+
+  worker:
+    env_file: .env
+    environment:
+      - DB_NAME=$DB_NAME
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_USER=$DB_USER
+      - DB_HOST=$DB_HOST
+      - DB_PORT=$DB_PORT
+      - DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+    build: .
+    command: ["/bin/bash", "./worker.sh"]
+    depends_on:
+      - db
+      - rabbitmq
+    volumes:
+      - ./:/usr/src/app
+      - .credentials/:/root/.credentials
+    links:
+      - db
+      - rabbitmq
+
+  scheduler:
+    env_file: .env
+    environment:
+      - DB_NAME=$DB_NAME
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_USER=$DB_USER
+      - DB_HOST=$DB_HOST
+      - DB_PORT=$DB_PORT
+      - DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+    build: .
+    command: ["/bin/bash", "./beat.sh"]
+    depends_on:
+      - db
+      - rabbitmq
+    volumes:
+      - ./:/usr/src/app
+      - .credentials/:/root/.credentials
+    links:
+      - db
+      - rabbitmq
+
+
+
+volumes:
+  static_volume:

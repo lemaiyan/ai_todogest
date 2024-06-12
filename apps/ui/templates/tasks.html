@@ -1,0 +1,90 @@
+{% extends 'include/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %} 
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Tasks</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Tasks</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <!-- /.row -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Tasks</h3>
+                  {% for message in messages %}
+                  <div class="alert {{ message.tags }} alert-dismissible">
+                      <button type="button" class="close" data-dismiss="alert"
+                              aria-label="Close">
+                      </button>
+                      {{ message }}
+                  </div>
+                  {% endfor %}
+                  <a href ="{% url 'apps.ui:addtask' %}" class="btn btn-primary float-right"><i class="fas fa-plus"></i> Add item</a>
+                <div class="card-tools">
+                  
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap table-condensed table-striped">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Category</th>
+                      <th>Priority</th>
+                      <th>Processed</th>
+                      <th>scheduled</th>
+                      <th>Due Date</th>
+                      <th>Added</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for rec in todos %}
+                    <tr>
+                      <td>{{ rec.title}}</td>
+                      <td>{{ rec.category.name}}</td>
+                      <td>{{ rec.priority.name}}</td>
+                      <td><span class="tag tag-success">{{ rec.completed}}</span></td>
+                      <td><span class="tag tag-success">{{ rec.added_to_calendar}}</span></td>
+                      <td>{{ rec.due_date| naturaltime}}</td>
+                      <td>{{ rec.created_at| naturaltime}}</td>
+                      <td>
+                        <div class="tools">
+                          <a href="{% url 'apps.ui:deletetask' rec.id %}"><i class="fas fa-trash"></i></a>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  {% endblock %}
