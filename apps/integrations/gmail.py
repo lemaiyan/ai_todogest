@@ -13,7 +13,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from structlog import get_logger
 
-from apps.google_oauth.models import GoogleUserTokens
+from apps.oauth.models import GoogleUserTokens
 from apps.todo.models import EmailDigest
 from apps.integrations.chatgpt import EmailSummary
 

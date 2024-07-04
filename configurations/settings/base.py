@@ -39,7 +39,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'apps.ui',
     'django_celery_beat',
-    "apps.google_oauth",
+    "apps.oauth",
     "apps.integrations",
     "apps.todo",
     "tinymce",
@@ -189,6 +189,11 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+
+OUTLOOK_SCOPES = ['Calendars.ReadWrite', 'Mail.ReadWrite', 'Mail.Send', 'User.Read']
+OUTLOOK_CLIENT_ID = os.environ.get('OUTLOOK_CLIENT_ID')
+OUTLOOK_CLIENT_SECRET = os.environ.get('OUTLOOK_CLIENT_SECRET')
 
 
 

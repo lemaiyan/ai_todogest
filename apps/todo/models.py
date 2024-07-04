@@ -106,7 +106,7 @@ def task_fetch_content(prompt, todo_item_id):
 def task_add_to_calendar(todo_item_id):
     logger.info("starting task-add-to-calendar")
     todo_item = TodoItem.objects.get(id=todo_item_id)
-    cal=calendar.Calendar(todo_item.user.email)
+    cal=calendar.GMailCalendar(todo_item.user.email)
     if todo_item.start_date is None or todo_item.end_date is None or todo_item.completed is False:
         logger.info("task-add-to-calendar", todo=todo_item.title, added=False, 
                     reason="start_date or end_date is None or completed is False", 

@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('google_oauth', '0003_googleusertokens_allow_digest'),
+        ('oauth', '0003_googleusertokens_allow_digest'),
     ]
 
     operations = [

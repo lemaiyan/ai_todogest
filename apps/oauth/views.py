@@ -16,7 +16,7 @@ from django.contrib.auth import login as django_login
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, reverse
 
-from apps.google_oauth.models import GoogleUserTokens, GoogleUser
+from apps.oauth.models import GoogleUserTokens, GoogleUser
 
 logger = get_logger()
 
@@ -91,7 +91,7 @@ def GoogleCalendarRedirectView(request):
                 user=user,
                 google_user_id=user_info['id'],
                 verified_email=user_info['verified_email'],
-                locale=user_info['locale'],
+                #locale=user_info['locale'],
                 photo=user_info['picture']
             )
         GoogleUserTokens.objects.create(user=user, token=credentials.to_json())

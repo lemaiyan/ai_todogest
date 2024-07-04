@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('google_oauth', '0004_googleuser'),
+        ('oauth', '0004_googleuser'),
     ]
 
     operations = [

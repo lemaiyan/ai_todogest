@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import redirect, reverse
 from django.views.generic import TemplateView
 from structlog import get_logger
-from apps.google_oauth.models import GoogleUser
+from apps.oauth.models import GoogleUser
 from apps.todo.models import Category, Priority, TodoItem, EmailDigest
 log = get_logger()
 

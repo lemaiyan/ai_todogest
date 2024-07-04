@@ -20,7 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path("google/", include("apps.google_oauth.urls")),
+    path("google/", include("apps.oauth.urls")),
     path("admin/", admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
     path(

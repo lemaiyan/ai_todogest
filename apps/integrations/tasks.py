@@ -1,4 +1,4 @@
-from apps.google_oauth.models import GoogleUserTokens
+from apps.oauth.models import GoogleUserTokens
 from apps.integrations.gmail import Gmail
 from celery import shared_task
 from celery.utils.log import get_task_logger
