@@ -11,7 +11,8 @@ log = get_logger()
 class LoginView(TemplateView):
     template_name = "login.html"
     
- 
+
+
 class UserTemplateView(TemplateView):
     def get(self, request, *args, **kwargs):
         if (

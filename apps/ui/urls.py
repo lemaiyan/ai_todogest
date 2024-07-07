@@ -1,4 +1,5 @@
-from apps.ui.views import LoginView, DashboardView, TaskView, AddTaskView, ProfileView, DigestView, ReadDigestView,DeleteTaskView, DeleteEmailDigestView
+from apps.ui.views import (LoginView, DashboardView, TaskView, AddTaskView, ProfileView, DigestView,
+                           ReadDigestView,DeleteTaskView, DeleteEmailDigestView)
 from django.urls import path
 app_name = "apps.ui"
 

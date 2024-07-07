@@ -191,7 +191,7 @@ MESSAGE_TAGS = {
 }
 
 
-OUTLOOK_SCOPES = ['Calendars.ReadWrite', 'Mail.ReadWrite', 'Mail.Send', 'User.Read']
+OUTLOOK_SCOPES = ['Calendars.ReadWrite', 'Mail.ReadWrite', 'Mail.Send', 'User.Read', 'offline_access']
 OUTLOOK_CLIENT_ID = os.environ.get('OUTLOOK_CLIENT_ID')
 OUTLOOK_CLIENT_SECRET = os.environ.get('OUTLOOK_CLIENT_SECRET')
 

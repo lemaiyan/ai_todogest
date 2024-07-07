@@ -1,0 +1,16 @@
+ email ="george.kamunya@rignationea.org"
+ from django.contrib.auth.models import User
+ user = User.objects.get(username=email)
+ from apps.integrations.utils.outlook_utils import DjangoTokenBackend
+ from O365 import Account, MSGraphProtocol
+ from django.conf import settings
+ credentials = (settings.OUTLOOK_CLIENT_ID, settings.OUTLOOK_CLIENT_SECRET)
+ token_backend = DjangoTokenBackend(user)
+
+
+from apps.integrations.calendar import OutlookCalendar
+import datetime as dt
+start_date =dt.datetime.now()
+end_date =dt.datetime.now() + dt.timedelta(hours=1)
+subject = "Test"
+body = "Test"

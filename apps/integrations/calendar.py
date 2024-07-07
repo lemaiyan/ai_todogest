@@ -13,6 +13,7 @@ from googleapiclient.errors import HttpError
 from structlog import get_logger
 
 from apps.oauth.models import GoogleUserTokens
+from apps.integrations.utils.outlook_utils import DjangoTokenBackend
 
 logger = get_logger()
 
@@ -79,34 +80,28 @@ class GMailCalendar:
 
 
 class OutlookCalendar:
-    def __int__(self):
+    def __init__(self, email):
+        self.user = User.objects.get(email=email)
         logger.info("Outlook calendar")
         credentials = (settings.OUTLOOK_CLIENT_ID, settings.OUTLOOK_CLIENT_SECRET)
-        self.account = Account(credentials, protocol=MSGraphProtocol())
+        token_backend = DjangoTokenBackend(self.user)
+        self.account = Account(credentials, protocol=MSGraphProtocol(), token_backend=token_backend)
         self.calendar = self.account.schedule()
-        self.scopes = ['Calendars.ReadWrite', 'Mail.ReadWrite', 'Mail.Send', 'User.Read']
         if not self.account.is_authenticated:
-            self.account.authenticate(scopes=self.scopes)
-            logger.info("Authenticated")
-    def __add_event(self, title, start_date, end_date, content, email):
-        event = self.calendar.new_event(
-            subject=title,
-            start=start_date,
-            end=end_date,
-            body=content,
-            location=email
-        )
+            self.account.con.refresh_token()
+            logger.info("Token refreshed")
+    def __add_event(self, title, start_date, end_date, content):
+        event = self.calendar.new_event()
+        event.subject = title,
+        event.start = start_date,
+        event.end = end_date,
+        event.body = content
         event.save()
         logger.info("Event created", event=event)
         return True, event
 
-
-    def add_event(self, title, start_date, end_date, content, email):
-        added, event = self.__add_event(title, start_date, end_date, content, email)
+    def add_event(self, title, start_date, end_date, content):
+        added, event = self.__add_event(title, start_date, end_date, content)
         logger.info("Adding event")
         return added, event
 
-    def get_events(self):
-        events =  self.calendar.get_events()
-        logger.info("Events", events=events)
-        return events

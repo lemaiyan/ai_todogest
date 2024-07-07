@@ -40,3 +40,23 @@ class GoogleUser(models.Model):
 
     class Meta:
         verbose_name_plural = 'Google User'
+
+
+class OutlookUserTokens(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token_type = models.CharField(max_length=255, null=True, blank=True)
+    scope = models.TextField(null=True, blank=True)
+    expires_in = models.IntegerField(default=0)
+    ext_expires_in = models.IntegerField(default=0)
+    access_token = models.TextField(null=True, blank=True)
+    refresh_token = models.TextField(null=True, blank=True)
+    expires_at = models.FloatField(default=0)
+    allow_digest = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.user.email
+
+    class Meta:
+        verbose_name_plural = 'Outlook User Tokens'

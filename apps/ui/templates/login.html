@@ -25,8 +25,11 @@
     <div class="card-body login-card-body">
       <p class="login-box-msg">Sign in to start your session</p>
       <div class="social-auth-links text-center mb-3">
-        <a href="http://localhost/google/calendar/init/jijoonfb@gmail.com/" class="btn btn-block btn-danger">
+        <a href="{% url 'apps.oauth:google_calendar_init'%}" class="btn btn-block btn-danger">
           <i class="fab fa-google mr-2"></i> Sign in using Google
+        </a>
+        <a href="{% url 'apps.oauth:outlook_login' %}" class="btn btn-block btn-danger">
+          <i class="fab fa-microsoft mr-2"></i> Sign in using Microsoft
         </a>
       </div>
     </div>
