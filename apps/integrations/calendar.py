@@ -1,6 +1,8 @@
 import datetime
 import os.path
 import json
+import datetime as dt
+
 
 from O365 import Account, MSGraphProtocol
 from django.conf import settings
@@ -90,18 +92,23 @@ class OutlookCalendar:
         if not self.account.is_authenticated:
             self.account.con.refresh_token()
             logger.info("Token refreshed")
-    def __add_event(self, title, start_date, end_date, content):
-        event = self.calendar.new_event()
-        event.subject = title,
-        event.start = start_date,
-        event.end = end_date,
-        event.body = content
-        event.save()
-        logger.info("Event created", event=event)
-        return True, event
 
-    def add_event(self, title, start_date, end_date, content):
-        added, event = self.__add_event(title, start_date, end_date, content)
+    def add_event(self, subject, body):
         logger.info("Adding event")
-        return added, event
+        start_date = dt.datetime.now()
+        end_date = dt.datetime.now() + dt.timedelta(hours=1)
+        event = self.calendar.new_event()
+        try:
+
+            event.subject = subject
+            event.start = start_date
+            event.end = end_date
+            event.body = body
+            event.location = "Online"
+            event.save()
+            return True, event
+        except Exception as error:
+            logger.error("Error creating event", error=error)
+            raise ValueError("Error creating event")
+
 

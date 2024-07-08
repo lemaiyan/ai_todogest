@@ -18,4 +18,3 @@ google-auth-oauthlib
 djangorestframework
 django-celery-beat
 O365
-msal

@@ -14,3 +14,4 @@ start_date =dt.datetime.now()
 end_date =dt.datetime.now() + dt.timedelta(hours=1)
 subject = "Test"
 body = "Test"
+c = OutlookCalendar(email, subject, body)
