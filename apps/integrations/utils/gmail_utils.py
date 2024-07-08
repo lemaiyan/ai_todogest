@@ -5,22 +5,24 @@ import re
 from bs4 import BeautifulSoup
 from structlog import get_logger
 
+
 def chunk_text(text, max_chars):
     paragraphs = re.split(r'\n+', text)
     chunks = []
     current_chunk = ''
-    
+
     for paragraph in paragraphs:
         if len(current_chunk) + len(paragraph) <= max_chars:
             current_chunk += paragraph + '\n'
         else:
             chunks.append(current_chunk.strip())
             current_chunk = paragraph + '\n'
-    
+
     if current_chunk:
         chunks.append(current_chunk.strip())
-    
+
     return chunks
+
 
 def get_unread_emails(service, limit=5):
     query = "is:unread is:inbox"
@@ -33,7 +35,7 @@ def get_unread_emails(service, limit=5):
     while 'nextPageToken' in response:
         page_token = response['nextPageToken']
         response = service.users().messages().list(userId='me', q=query, pageToken=page_token).execute()
-        
+
         if 'messages' in response:
             messages.extend(response['messages'])
 
@@ -41,19 +43,22 @@ def get_unread_emails(service, limit=5):
         messages = messages[:limit]
     return messages
 
+
 def mark_as_read_and_archive(service, message_id):
     service.users().messages().modify(
         userId='me',
         id=message_id,
         body={'removeLabelIds': ['UNREAD', 'INBOX']}
     ).execute()
-    
+
+
 def mark_as_read(service, message_id):
     service.users().messages().modify(
         userId='me',
         id=message_id,
         body={'removeLabelIds': ['UNREAD']}
     ).execute()
+
 
 def create_email(sender, to, subject, body):
     message = MIMEMultipart()
@@ -65,6 +70,7 @@ def create_email(sender, to, subject, body):
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
     return {'raw': raw_message}
 
+
 def send_email(service, email):
     try:
         sent_message = service.users().messages().send(userId='me', body=email).execute()
@@ -74,6 +80,7 @@ def send_email(service, email):
         sent_message = None
     return sent_message
 
+
 def remove_hyperlinks(text):
     # Remove URLs starting with http/https
     text = re.sub(r'http\S+', '', text)
@@ -82,6 +89,7 @@ def remove_hyperlinks(text):
     text = re.sub(r'\S+\.net\S*', '', text)
     text = re.sub(r'\S+\.org\S*', '', text)
     return text
+
 
 def get_email_data(service, message_id):
     msg = service.users().messages().get(userId='me', id=message_id, format='full').execute()
@@ -127,4 +135,12 @@ def get_email_data(service, message_id):
         soup = BeautifulSoup(text, 'html.parser')
         email_data['text'] = soup.get_text()
 
+    return email_data
+
+
+def get_outlook_email_data(message):
+    email_data = {'from': message.sender}
+    email_data['subject'] = message.subject
+    email_data['date'] = message.received
+    email_data['text'] = remove_hyperlinks(message.get_body_soup().get_text())
     return email_data

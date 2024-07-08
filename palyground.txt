@@ -15,3 +15,11 @@ end_date =dt.datetime.now() + dt.timedelta(hours=1)
 subject = "Test"
 body = "Test"
 c = OutlookCalendar(email, subject, body)
+
+from apps.integrations.email import OutlookEmail
+email ="george.kamunya@rignationea.org"
+e = OutlookEmail(email)
+s = e.summarize_inbox()
+m = e.get_inbox()
+e.send_email("test", "test")
+
