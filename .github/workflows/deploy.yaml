@@ -48,12 +48,6 @@ jobs:
         echo "OUTLOOK_CLIENT_ID=${{ secrets.OUTLOOK_CLIENT_ID }}" >> .env
         echo "OUTLOOK_CLIENT_SECRET=${{ secrets.OUTLOOK_CLIENT_SECRET }}" >> .env
 
-    - name: Stop Docker Compose
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
-        cd /home/${{ env.USERNAME }}/project
-        docker-compose stop
-        EOF
 
     - name: Create and copy .credentials folder to Azure VM
       run: |
@@ -80,5 +74,5 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
         cd /home/${{ env.USERNAME }}/project
-        sudo docker-compose up -d --build
+        docker-compose stop && sudo docker-compose up -d --build
         EOF
