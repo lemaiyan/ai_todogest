@@ -23,12 +23,6 @@ jobs:
       with:
         ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
 
-    - name: Stop Docker Compose (if running)
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
-        cd /home/${{ env.USERNAME }}/project
-        docker-compose down
-        EOF
 
     - name: Delete existing .env file (if exists)
       run: |
@@ -63,5 +57,5 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
         cd /home/${{ env.USERNAME }}/project
-        docker-compose up -d --build
+        docker-compose stop && docker-compose up -d --build
         EOF
