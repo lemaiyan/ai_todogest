@@ -5,13 +5,6 @@ on:
     branches:
       - main  # Change this to your default branch
 
-name: Deploy to Azure VM
-
-on:
-  push:
-    branches:
-      - main  # Change this to your default branch
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
