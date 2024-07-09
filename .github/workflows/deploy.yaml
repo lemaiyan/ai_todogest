@@ -62,10 +62,6 @@ jobs:
       run: |
         scp -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key .env ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:/home/${{ env.USERNAME }}/project/.env
 
-    - name: Copy .credentials folder to Azure VM
-      run: |
-        scp -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key -r .credentials ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:/home/${{ env.USERNAME }}/project
-
     - name: Copy other files to Azure VM
       run: |
         scp -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key -r * ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:/home/${{ env.USERNAME }}/project
