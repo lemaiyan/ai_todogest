@@ -51,7 +51,7 @@ jobs:
 
     - name: Copy files to Azure VM
       run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/azure_vm_key -r . ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:/home/${{ env.USERNAME }}/project
+        scp -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key -r *  ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:/home/${{ env.USERNAME }}/project
 
     - name: Deploy with Docker Compose
       run: |
