@@ -13,8 +13,8 @@ jobs:
       VM_PUBLIC_IP: ${{ secrets.VM_PUBLIC_IP }}
       USERNAME: ${{ secrets.VM_USERNAME }}
       SSH_PRIVATE_KEY: ${{ secrets.AZURE_VM_SSH_KEY }}
-      SSL_CERT_PATH: /etc/ssl/certs/
-      SSL_KEY_PATH: /etc/ssl/private/
+      SSL_CERT_PATH: /home/${{ env.USERNAME }}/project/certs/
+      SSL_KEY_PATH: /home/${{ env.USERNAME }}/project/private/
       NGINX_CONFIG_PATH: /etc/nginx/sites-available/todogest
 
     steps:
