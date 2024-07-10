@@ -36,8 +36,8 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
         if [ ! -f "${{ env.SSL_CERT_PATH }}" ] || [ ! -f "${{ env.SSL_KEY_PATH }}" ]; then
           sudo mkdir -p $(dirname "${{ env.SSL_CERT_PATH }}") $(dirname "${{ env.SSL_KEY_PATH }}")
-          sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key /path/to/todogest.crt ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_CERT_PATH }}
-          sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key /path/to/todogest.key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_KEY_PATH }}
+          sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key ${{ env.SSL_CERT_PATH }} ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_CERT_PATH }}
+          sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key ${{ env.SSL_KEY_PATH }} ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_KEY_PATH }}
           sudo chmod 600 ${{ env.SSL_CERT_PATH }} ${{ env.SSL_KEY_PATH }}
         fi
         EOF
