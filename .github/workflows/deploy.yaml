@@ -58,11 +58,11 @@ jobs:
                 listen 443 ssl;
                 server_name todogest.eastus.cloudapp.azure.com;
           
-                ssl_certificate ${{ env.SSL_CERT_PATH }}/todogest.crt;
-                ssl_certificate_key ${{ env.SSL_KEY_PATH }}/todogest.key;
+                ssl_certificate /home/azureuser/project/certs/todogest.crt;
+                ssl_certificate_key /home/azureuser/project/private/todogest.key;
           
                 location / {
-                    proxy_pass http://localhost
+                    proxy_pass http://localhost;
                     proxy_http_version 1.1;
                     proxy_set_header Upgrade $http_upgrade;
                     proxy_set_header Connection 'upgrade';
