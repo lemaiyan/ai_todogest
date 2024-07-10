@@ -35,7 +35,6 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
         if [ ! -f "${{ env.SSL_CERT_PATH }}/todogest.crt" ] || [ ! -f "${{ env.SSL_KEY_PATH }}/todogest.key" ]; then
-          sudo mkdir -p $(dirname "${{ env.SSL_CERT_PATH }}") $(dirname "${{ env.SSL_KEY_PATH }}")
           sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key todogest.crt ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_CERT_PATH }}
           sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key todogest.key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_KEY_PATH }}
           sudo chmod 600 ${{ env.SSL_CERT_PATH }} ${{ env.SSL_KEY_PATH }}
@@ -59,8 +58,8 @@ jobs:
                 listen 443 ssl;
                 server_name todogest.eastus.cloudapp.azure.com;
           
-                ssl_certificate ${SSL_CERT_PATH};
-                ssl_certificate_key ${SSL_KEY_PATH};
+                ssl_certificate ${{ env.SSL_CERT_PATH }}/todogest.crt;
+                ssl_certificate_key ${{ env.SSL_KEY_PATH }}/todogest.key;
           
                 location / {
                     proxy_pass http://localhost
@@ -125,5 +124,5 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
         cd /home/${{ env.USERNAME }}/project
-        docker-compose stop && sudo docker-compose up -d --build
+        sudo docker-compose stop && sudo docker-compose up -d --build
         EOF
