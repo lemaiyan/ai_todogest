@@ -13,6 +13,9 @@ jobs:
       VM_PUBLIC_IP: ${{ secrets.VM_PUBLIC_IP }}
       USERNAME: ${{ secrets.VM_USERNAME }}
       SSH_PRIVATE_KEY: ${{ secrets.AZURE_VM_SSH_KEY }}
+      SSL_CERT_PATH: /etc/ssl/certs/todogest.crt
+      SSL_KEY_PATH: /etc/ssl/private/todogest.key
+      NGINX_CONFIG_PATH: /etc/nginx/sites-available/todogest
 
     steps:
     - name: Checkout code
@@ -22,6 +25,58 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
+
+    - name: Fetch SSL Certificates from Secrets
+      run: |
+        echo "${{ secrets.SSL_CERT }}" > todogest.crt
+        echo "${{ secrets.SSL_KEY }}" > todogest.key
+        chmod 600 todogest.crt todogest.key
+    - name: Push SSL Certificates to Azure VM if not exists
+      run: |
+        ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
+        if [ ! -f "${{ env.SSL_CERT_PATH }}" ] || [ ! -f "${{ env.SSL_KEY_PATH }}" ]; then
+          sudo mkdir -p $(dirname "${{ env.SSL_CERT_PATH }}") $(dirname "${{ env.SSL_KEY_PATH }}")
+          sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key /path/to/todogest.crt ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_CERT_PATH }}
+          sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key /path/to/todogest.key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_KEY_PATH }}
+          sudo chmod 600 ${{ env.SSL_CERT_PATH }} ${{ env.SSL_KEY_PATH }}
+        fi
+        EOF
+    - name: Install nginx if not already installed
+      run: |
+        ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
+        if ! command -v nginx &> /dev/null; then
+          sudo apt-get update
+          sudo apt-get install -y nginx
+        fi
+        EOF
+
+    - name: Update nginx configuration if not exists
+      run: |
+        ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
+        if [ ! -f "${{ env.NGINX_CONFIG_PATH }}" ]; then
+          sudo bash -c 'cat <<EOF >${{ env.NGINX_CONFIG_PATH }}
+            server {
+                listen 443 ssl;
+                server_name todogest.eastus.cloudapp.azure.com;
+          
+                ssl_certificate ${SSL_CERT_PATH};
+                ssl_certificate_key ${SSL_KEY_PATH};
+          
+                location / {
+                    proxy_pass http://localhost
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_cache_bypass $http_upgrade;
+                }
+            }
+          EOF'
+          sudo ln -s /etc/nginx/sites-available/todogest /etc/nginx/sites-enabled/
+          sudo nginx -t  # Test nginx configuration
+          sudo systemctl restart nginx
+        fi
+        EOF
 
     - name: Delete existing .env file (if exists)
       run: |
