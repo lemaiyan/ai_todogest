@@ -13,8 +13,8 @@ jobs:
       VM_PUBLIC_IP: ${{ secrets.VM_PUBLIC_IP }}
       USERNAME: ${{ secrets.VM_USERNAME }}
       SSH_PRIVATE_KEY: ${{ secrets.AZURE_VM_SSH_KEY }}
-      SSL_CERT_PATH: /etc/ssl/certs/todogest.crt
-      SSL_KEY_PATH: /etc/ssl/private/todogest.key
+      SSL_CERT_PATH: /etc/ssl/certs/
+      SSL_KEY_PATH: /etc/ssl/private/
       NGINX_CONFIG_PATH: /etc/nginx/sites-available/todogest
 
     steps:
@@ -34,8 +34,7 @@ jobs:
     - name: Push SSL Certificates to Azure VM if not exists
       run: |
         ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/azure_vm_key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }} << 'EOF'
-        if [ ! -f "${{ env.SSL_CERT_PATH }}" ] || [ ! -f "${{ env.SSL_KEY_PATH }}" ]; then
-          sudo mkdir -p $(dirname "${{ env.SSL_CERT_PATH }}") $(dirname "${{ env.SSL_KEY_PATH }}")
+        if [ ! -f "${{ env.SSL_CERT_PATH }}/todogest.crt" ] || [ ! -f "${{ env.SSL_KEY_PATH }}/todogest.key" ]; then
           sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key todogest.crt ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_CERT_PATH }}
           sudo scp -o StrictHostKeyChecking=no -i /home/${{ env.USERNAME }}/.ssh/azure_vm_key todogest.key ${{ env.USERNAME }}@${{ env.VM_PUBLIC_IP }}:${{ env.SSL_KEY_PATH }}
           sudo chmod 600 ${{ env.SSL_CERT_PATH }} ${{ env.SSL_KEY_PATH }}
