@@ -28,14 +28,14 @@ home_dir = os.path.expanduser('~')
 credential_dir = os.path.join(home_dir, '.credentials')
 credential_path = os.path.join(credential_dir, 'credentials.json')
 
-REDIRECT_URI = 'http://localhost/oauth/google/calendar/redirect/'
+REDIRECT_URI = settings.GOOGLE_REDIRECT_URIS
 
 CLIENT_SECRETS_FILE = credential_path
 
 CLIENT_ID = settings.OUTLOOK_CLIENT_ID,
 CLIENT_SECRET = settings.OUTLOOK_CLIENT_SECRET
 AUTHORITY = 'https://login.microsoftonline.com/2bc9faed-d87c-43e7-af55-fab8edb478a9'
-OUTLOOK_REDIRECT_URI = 'http://localhost/oauth/outlook/redirect/'
+OUTLOOK_REDIRECT_URI = settings.OUTLOOK_REDIRECT_URIS
 OUTLOOK_SCOPES = settings.OUTLOOK_SCOPES
 
 
