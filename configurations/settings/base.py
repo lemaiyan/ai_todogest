@@ -145,9 +145,7 @@ GOOGLE_SSO_ALLOWABLE_DOMAINS = ["localhost", "gmail.com"]
 
 # List of emails that will be created as superuser
 GOOGLE_SSO_SUPERUSER_LIST = ["jijolemaiyan@gmail.com"]
-GOOGLE_REDIRECT_URIS = [
-  'http://localhost/google/calendar/redirect/'
-]
+GOOGLE_REDIRECT_URIS = 'http://localhost/oauth/google/calendar/redirect/'
 
 # If True, the first user that logs in will be created as superuser
 # if no superuser exists in the database at all
@@ -194,9 +192,8 @@ MESSAGE_TAGS = {
 OUTLOOK_SCOPES = ['Calendars.ReadWrite', 'Mail.ReadWrite', 'Mail.Send', 'User.Read', 'offline_access']
 OUTLOOK_CLIENT_ID = os.environ.get('OUTLOOK_CLIENT_ID')
 OUTLOOK_CLIENT_SECRET = os.environ.get('OUTLOOK_CLIENT_SECRET')
-OUTLOOK_REDIRECT_URIS = [
-  'http://localhost/oauth/outlook/redirect/'
-]
+OUTLOOK_REDIRECT_URIS = 'http://localhost/oauth/outlook/redirect/'
+
 
 
 
