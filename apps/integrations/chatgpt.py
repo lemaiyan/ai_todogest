@@ -19,7 +19,7 @@ class Preprocess:
         system_prompt = '''You are a language model that gives content based on a prompt.'''
         style = "give the the response in a bullet point format"
         if type == "outlook":
-            style = "give the the response in html format just the body"
+            style = "give the the response in formatted in html only"
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": style},
