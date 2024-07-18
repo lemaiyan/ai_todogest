@@ -31,7 +31,7 @@ class GMailCalendar:
         token = None
         self.service = None
         try:
-            token = GoogleUserTokens.objects.get(user__email=email)
+            token = GoogleUserTokens.objects.filter(user__email=email).last()
             logger.info("Retrieved token", token=token.token)
             logger.info("Refreshing token")
             creds = Credentials(
@@ -106,7 +106,7 @@ class OutlookCalendar:
             event.body = body
             event.location = "Online"
             event.save()
-            return True, event
+            return True
         except Exception as error:
             logger.error("Error creating event", error=error)
             raise ValueError("Error creating event")

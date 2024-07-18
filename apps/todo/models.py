@@ -93,8 +93,12 @@ def create_user_profile(sender, instance, created, **kwargs):
 def task_fetch_content(prompt, todo_item_id):
     logger.info("starting task-fetch-content")
     p = chatgpt.Preprocess()
-    content = p.prompt(prompt)
     todo_item = TodoItem.objects.get(id=todo_item_id)
+    content = ""
+    if not todo_item.user.email.endswith('@gmail.com'):
+        content = p.prompt(prompt, type="outlook")
+    else:
+        content = p.prompt(prompt)
     todo_item.content = content
     todo_item.completed = True
     todo_item.save()
@@ -106,20 +110,41 @@ def task_fetch_content(prompt, todo_item_id):
 def task_add_to_calendar(todo_item_id):
     logger.info("starting task-add-to-calendar")
     todo_item = TodoItem.objects.get(id=todo_item_id)
-    cal=calendar.GMailCalendar(todo_item.user.email)
-    if todo_item.start_date is None or todo_item.end_date is None or todo_item.completed is False:
-        logger.info("task-add-to-calendar", todo=todo_item.title, added=False, 
-                    reason="start_date or end_date is None or completed is False", 
-                    start_date=todo_item.start_date, end_date=todo_item.end_date, 
-                    completed=todo_item.completed)
-        return
-    content = todo_item.content
-    if "I am unable" in content or "I am not able" in content:
-        content = todo_item.title
-    added, event = cal.add_event(todo_item.title, todo_item.start_date, todo_item.end_date, content, todo_item.user.email)
-    if added:
+    # check if user email is gmail or not
+    if todo_item.user.email.endswith('@gmail.com'):
+
+        cal = calendar.GMailCalendar(todo_item.user.email)
+        if todo_item.start_date is None or todo_item.end_date is None or todo_item.completed is False:
+            logger.info("task-add-to-calendar", todo=todo_item.title, added=False,
+                        reason="start_date or end_date is None or completed is False",
+                        start_date=todo_item.start_date, end_date=todo_item.end_date,
+                        completed=todo_item.completed)
+            return
+        content = todo_item.content
+        if "I am unable" in content or "I am not able" in content:
+            content = todo_item.title
+        added, event = cal.add_event(todo_item.title, todo_item.start_date, todo_item.end_date, content,
+                                     todo_item.user.email)
+        if added:
+            todo_item.added_to_calendar = True
+            todo_item.event = event
+            todo_item.save()
+        logger.info("task-add-to-calendar", todo=todo_item.title, added=added)
+        logger.info("ending task-add-to-calendar")
+    else:
+        cal = calendar.OutlookCalendar(todo_item.user.email)
+        if todo_item.start_date is None or todo_item.end_date is None or todo_item.completed is False:
+            logger.info("task-add-to-calendar", todo=todo_item.title, added=False,
+                        reason="start_date or end_date is None or completed is False",
+                        start_date=todo_item.start_date, end_date=todo_item.end_date,
+                        completed=todo_item.completed)
+            return
+        content = todo_item.content
+        if "I am unable" in content or "I am not able" in content:
+            content = todo_item.title
+        event = cal.add_event(todo_item.title, content)
         todo_item.added_to_calendar = True
-        todo_item.event = event
+        todo_item.event = None
         todo_item.save()
-    logger.info("task-add-to-calendar", todo=todo_item.title, added=added)
-    logger.info("ending task-add-to-calendar")
+        logger.info("task-add-to-calendar", todo=todo_item.title, added=True, event=event)
+        logger.info("ending task-add-to-calendar")

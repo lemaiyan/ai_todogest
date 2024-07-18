@@ -15,7 +15,7 @@ class DjangoTokenBackend(BaseTokenBackend):
     def load_token(self):
         logger.info("Getting token")
         try:
-            token = OutlookUserTokens.objects.get(user=self.user)
+            token = OutlookUserTokens.objects.filter(user=self.user).last()
             token_dict = {
                 'token_type': token.token_type,
                 'access_token': token.access_token,

@@ -14,9 +14,18 @@ class Preprocess:
         self.key = settings.CHAGPT_KEY
         openai.api_key = self.key
 
-    def prompt(self, text):
+    def prompt(self, text, type="gmail"):
         logger.info("Prompting AI Model")
-        messages = [{"role": "user", "content": text}]
+        system_prompt = '''You are a language model that gives content based on a prompt.'''
+        style = "give the the response in a bullet point format"
+        if type == "outlook":
+            style = "give the the response in html format just the body"
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": style},
+            {"role": "assistant", "content": "On what topic?"},
+            {"role": "user", "content": text}
+        ]
         responses = openai.ChatCompletion.create(model=self.model, messages=messages)
         content = responses.choices[0].message["content"]
         logger.info("AI Model response", response=content)
@@ -58,7 +67,7 @@ class EmailSummary:
                 logger.info("email summarization")
                 system_prompt = '''You are a language model that summarizes emails in 3-5 bullet points.'''
                 user_input = f'''Summarize the following in less than 100 words and only using 3-5 bullet points: {email_text}'''
-                style = "Powerpoint slide with 3-5 bullet points"
+                style = "Powerpoint slide with 3-5 bullet points with </br> at the end of each bullet point"
                 messages = [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": style},

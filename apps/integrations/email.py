@@ -19,6 +19,7 @@ from apps.integrations.chatgpt import EmailSummary
 from O365 import Account, MSGraphProtocol
 from django.conf import settings
 from apps.integrations.utils.outlook_utils import DjangoTokenBackend
+from apps.integrations.utils.email import EMAIL_HTML_TEMPLATE
 
 logger = get_logger()
 
@@ -48,7 +49,7 @@ class Gmail:
         self.service = None
         self.email = email
         try:
-            token = GoogleUserTokens.objects.get(user__email=email)
+            token = GoogleUserTokens.objects.filter(user__email=email).last()
             logger.info("Retrieved token", token=token.token)
             logger.info("Refreshing token")
             creds = Credentials(
@@ -86,7 +87,7 @@ class Gmail:
 
     def __summarize_email(self, emails):
         total_emails = len(emails)
-        email_summaries = ""
+        email_summaries_html = ""
         summarizer = EmailSummary()
         for idx, message in enumerate(emails, start=1):
             try:
@@ -103,11 +104,16 @@ class Gmail:
                         "Skipping email with ID {email_data['id']} because no text content was found or was another diget email.")
 
                 # Add the output to an ongoing list or string called email_summaries
-                email_summaries += f"From: {email_data['from']}\n"
-                email_summaries += f"Subject: {email_data['subject']}\n"
-                email_summaries += f"Timestamp: {email_data['date']}\n"
-                email_summaries += f"Link: https://mail.google.com/mail/u/0/#inbox/{message['id']}\n"
-                email_summaries += f"Summary:\n{summary}\n\n\n"
+                email_summaries_html += f"""
+                    <div class="email-entry">
+                        <p><strong>From:</strong> {email_data['from']}</p>
+                        <p><strong>Subject:</strong> {email_data['subject']}</p>
+                        <p><strong>Timestamp:</strong> {email_data['date']}</p>
+                        <p><strong>Link:</strong> <a href="https://mail.google.com/mail/u/0/#inbox/{message['id']}">Open Email</a></p>
+                        <p><strong>Summary:</strong></p>
+                        <p>{summary}</p>
+                    </div>
+                """
 
                 # Mark the summarized emails as read and archived
                 if "Skipping email because no text content was found." not in summary and "Email Summaries" not in \
@@ -121,6 +127,7 @@ class Gmail:
                 logger.info("Error summarizing email", id=message['id'], subject=email_data['subject'])
                 traceback.print_exc()
                 continue
+        email_summaries = EMAIL_HTML_TEMPLATE.format(email_summaries=email_summaries_html)
         EmailDigest.objects.create(user=self.user, summary=email_summaries)
         return email_summaries
 
@@ -176,7 +183,7 @@ class OutlookEmail:
         message.send()
     def __summarize_email(self, emails):
         total_emails = len(emails)
-        email_summaries = ""
+        email_summaries_html = ""
         summarizer = EmailSummary()
         for idx, message in enumerate(emails, start=1):
             try:
@@ -184,10 +191,10 @@ class OutlookEmail:
                 logger.info("Trying to summarize email", subject=email_data['subject'])
                 if 'text' in email_data and email_data['subject'] is not "Todogest Summary":
                     summary = email_data['text']
-                    if len(summary.split()) >= 100:
+                    if len(summary.split()) >= 120:
                         summary = summarizer.summarize_email(email_data['text'])
                         # Loop until the summary is fewer than 100 words
-                        while len(summary.split()) >= 100:
+                        while len(summary.split()) >= 120:
                             summary = summarizer.summarize_email(summary)
                 else:
                     summary = ""
@@ -195,10 +202,15 @@ class OutlookEmail:
                         "Skipping email with ID {email_data['id']} because no text content was found or was another diget email.")
 
                 # Add the output to an ongoing list or string called email_summaries
-                email_summaries += f"From: {email_data['from']}\n"
-                email_summaries += f"Subject: {email_data['subject']}\n"
-                email_summaries += f"Timestamp: {email_data['date']}\n"
-                email_summaries += f"Summary:\n{summary}\n\n\n"
+                email_summaries_html += f"""
+                                <div class="email-entry">
+                                    <p><strong>From:</strong> {email_data['from']}</p>
+                                    <p><strong>Subject:</strong> {email_data['subject']}</p>
+                                    <p><strong>Timestamp:</strong> {email_data['date']}</p>
+                                    <p><strong>Summary:</strong></p>
+                                    <p>{summary}</p>
+                                </div>
+                            """
 
                 # Mark the summarized emails as read and archived
                 logger.info(f"({idx} of {total_emails}) emails processed.")
@@ -206,5 +218,6 @@ class OutlookEmail:
                 logger.info("Error summarizing email",  subject=email_data['subject'])
                 traceback.print_exc()
                 continue
-        EmailDigest.objects.create(user=self.user, summary=email_summaries)
+        email_summaries = EMAIL_HTML_TEMPLATE.format(email_summaries=email_summaries_html)
+        EmailDigest.objects.create(user=self.user, summary=email_summaries_html)
         return email_summaries

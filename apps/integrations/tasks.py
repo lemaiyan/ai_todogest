@@ -1,5 +1,6 @@
-from apps.oauth.models import GoogleUserTokens
-from apps.integrations.gmail import Gmail
+from apps.oauth.models import GoogleUserTokens, OutlookUserTokens
+from django.contrib.auth.models import User
+from apps.integrations.email import Gmail, OutlookEmail
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
@@ -12,9 +13,16 @@ def hello_world():
 
 @shared_task(name='create_digests')
 def create_digests():
-    users = GoogleUserTokens.objects.all()
+    users = User.objects.all()
     logger.info(f'Creating digests for {len(users)} users')
     for user in users:
-        if user.allow_digest:
-            summary = Gmail(user.user.email)
-            summary.summarize_inbox(limit=3)
+        if user.email.endswith('@gmail.com'):
+            token = GoogleUserTokens.objects.filter(user=user).last()
+            if token and token.allow_digest:
+                summary = Gmail(user.email)
+                summary.summarize_inbox(limit=3)
+        else:
+            token = OutlookUserTokens.objects.filter(user=user).last()
+            if token and token.allow_digest:
+                summary = OutlookEmail(user.email)
+                summary.summarize_inbox(limit=3)

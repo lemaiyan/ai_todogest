@@ -144,7 +144,7 @@ class OutlookRedirectView(View):
 
             try:
                 logger.info("Retrieved token", token=token)
-                OutlookUserTokens.objects.filter(user=current_user).update(**token)
+                OutlookUserTokens.objects.update_or_create(user=current_user, **token)
                 logger.info("Updated token", token=token)
             except OutlookUserTokens.DoesNotExist:
                 logger.info("Token does not exist")

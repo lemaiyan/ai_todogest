@@ -65,7 +65,7 @@ def create_email(sender, to, subject, body):
     message['To'] = to
     message['From'] = sender
     message['Subject'] = subject
-    message.attach(MIMEText(body, 'plain'))
+    message.attach(MIMEText(body, 'html'))
 
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
     return {'raw': raw_message}
