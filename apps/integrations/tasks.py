@@ -16,13 +16,14 @@ def create_digests():
     users = User.objects.all()
     logger.info(f'Creating digests for {len(users)} users')
     for user in users:
-        if user.email.endswith('@gmail.com'):
-            token = GoogleUserTokens.objects.filter(user=user).last()
-            if token and token.allow_digest:
-                summary = Gmail(user.email)
-                summary.summarize_inbox(limit=3)
-        else:
+        if not user.email.endswith('@gmail.com'):
             token = OutlookUserTokens.objects.filter(user=user).last()
             if token and token.allow_digest:
                 summary = OutlookEmail(user.email)
                 summary.summarize_inbox(limit=3)
+        else:
+            token = GoogleUserTokens.objects.filter(user=user).last()
+            if token and token.allow_digest:
+                summary = Gmail(user.email)
+                summary.summarize_inbox(limit=3)
+

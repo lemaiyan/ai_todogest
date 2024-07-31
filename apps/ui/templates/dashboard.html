@@ -96,7 +96,8 @@
                     <small class="badge badge-success"><i class="far fa-clock"></i> {{ rec.due_date|naturaltime}}</small>
                     <!-- General tools such as edit or delete-->
                     <div class="tools">
-                      <a href="{% url 'apps.ui:deletetask' rec.id %}"><i class="fas fa-trash"></i></a>
+                      <a href="{% url 'apps.ui:deletetask' rec.id %}"><i class="fas fa-trash"></i></a> &nbsp;
+                        <a href="{% url 'apps.ui:task' rec.id %}"><i class="fas fa-eye"></i></a>
                     </div>
                   </li>
                   {% endfor %}

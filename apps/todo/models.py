@@ -31,7 +31,7 @@ class Category(models.Model):
 
 class Priority(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField( blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -49,9 +49,9 @@ class TodoItem(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     priority = models.ForeignKey(Priority, on_delete=models.CASCADE)
     content = models.TextField(blank=True, null=True)
-    due_date = models.DateTimeField(default=datetime.now() + timedelta(days=2), blank=True, null=True)
-    start_date = models.DateTimeField(default=datetime.now() + timedelta(days=1), blank=True, null=True)
-    end_date = models.DateTimeField(default=datetime.now() + timedelta(days=1,hours=1), blank=True, null=True)
+    due_date = models.DateTimeField(auto_now=True, blank=True, null=True)
+    start_date = models.DateTimeField(auto_now=True, blank=True, null=True)
+    end_date = models.DateTimeField(auto_now=True, blank=True, null=True)
     added_to_calendar = models.BooleanField(default=False)
     event = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -68,15 +68,17 @@ class TodoItem(models.Model):
         verbose_name_plural = 'Todo Items'
         ordering = ['title']
 
+
 class EmailDigest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     summary = models.TextField(blank=True, null=True)
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         verbose_name_plural = 'Email Summary'
         ordering = ['created_at']
+
 
 @receiver(post_save, sender=TodoItem)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -84,9 +86,8 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         logger.info("created", instance=instance.title)
         task_fetch_content.apply_async(args=(instance.title, instance.id),
-                                                       queue='chatgpt_fetch_content')
+                                       queue='chatgpt_fetch_content')
     logger.info("end post_save")
-
 
 
 @shared_task(name='chatgpt.fetch_content')
@@ -105,6 +106,7 @@ def task_fetch_content(prompt, todo_item_id):
     logger.info("task-fetch-content", content=content, todo=todo_item.title)
     logger.info("ending task-fetch-content")
     task_add_to_calendar.apply_async(args=(todo_item.id,), queue='calendar_add_to_calendar')
+
 
 @shared_task(name='chatgpt.add_to_calendar')
 def task_add_to_calendar(todo_item_id):

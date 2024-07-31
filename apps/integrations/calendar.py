@@ -3,7 +3,6 @@ import os.path
 import json
 import datetime as dt
 
-
 from O365 import Account, MSGraphProtocol
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -25,6 +24,7 @@ home_dir = os.path.expanduser('~')
 credential_dir = os.path.join(home_dir, '.credentials')
 credential_path = os.path.join(credential_dir, 'credentials.json')
 
+
 class GMailCalendar:
     def __init__(self, email) -> None:
         current_user = User.objects.get(email=email)
@@ -33,21 +33,26 @@ class GMailCalendar:
         try:
             token = GoogleUserTokens.objects.filter(user__email=email).last()
             logger.info("Retrieved token", token=token.token)
-            logger.info("Refreshing token")
             creds = Credentials(
                 **json.loads(token.token)
             )
-            logger.info("Retrieved creds", creds=creds)
-            self.service = build("calendar", "v3", credentials=creds)
+            logger.debug("expiry", expiry=creds.expiry, instance=type(creds.expiry))
             if creds and creds.refresh_token:
                 creds.refresh(Request())
                 token.token = creds.to_json()
                 token.save()
+                import ipdb; ipdb.set_trace()
+                logger.debug("expiry", expiry=creds.expiry, instance=type(creds.expiry))
                 logger.info("Refreshed token", token=token.token)
-                self.service = build("calendar", "v3", credentials=creds)
+
+            #creds.expiry = None
+
+            self.service = build("calendar", "v3", credentials=creds)
+
         except GoogleUserTokens.DoesNotExist:
             token = None
             logger.info("Token does not exist you need to connect your calendar", email=email)
+
     def __add_event(self, title, start_date, end_date, content, email):
         try:
             calendar_event = {
@@ -62,10 +67,10 @@ class GMailCalendar:
                     'timeZone': 'Africa/Nairobi',
                 },
                 'attendees': [
-                    {'email':  f"{email}"},
+                    {'email': f"{email}"},
                 ],
                 'reminders': {
-                    'useDefault': True,         
+                    'useDefault': True,
                 }
             }
             event = self.service.events().insert(calendarId='primary', body=calendar_event).execute()
@@ -74,11 +79,11 @@ class GMailCalendar:
         except HttpError as err:
             logger.error("Error creating event", err=err)
             return False, None
+
     def add_event(self, title, start_date, end_date, content, email):
         logger.info("Adding event")
         added, event = self.__add_event(title, start_date, end_date, content, email)
         return added, event
-
 
 
 class OutlookCalendar:
@@ -110,5 +115,3 @@ class OutlookCalendar:
         except Exception as error:
             logger.error("Error creating event", error=error)
             raise ValueError("Error creating event")
-
-

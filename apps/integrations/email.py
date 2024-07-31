@@ -55,13 +55,14 @@ class Gmail:
             creds = Credentials(
                 **json.loads(token.token)
             )
+            self.service = build("gmail", "v1", credentials=creds)
             logger.info("Retrieved creds", creds=creds)
             if creds and creds.refresh_token:
                 creds.refresh(Request())
                 token.token = creds.to_json()
                 token.save()
                 logger.info("Refreshed token", token=token.token)
-                self.service = build("gmail", "v1", credentials=creds)
+
         except GoogleUserTokens.DoesNotExist:
             token = None
             logger.info("Token does not exist you need to connect your gmail", email=email)

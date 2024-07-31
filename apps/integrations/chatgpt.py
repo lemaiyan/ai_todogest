@@ -17,14 +17,19 @@ class Preprocess:
     def prompt(self, text, type="gmail"):
         logger.info("Prompting AI Model")
         system_prompt = '''You are a language model that gives content based on a prompt.'''
+        prompt = f'''I need help getting started with a task on my to-do list. 
+                Can you provide me with a brief overview and some starter 
+                content for the following task: {text}? 
+                Please include the key steps involved, any important considerations, 
+                and useful tips to help me complete this task efficiently.'''
         style = "give the the response in a bullet point format"
         if type == "outlook":
-            style = "give the the response in formatted in html only"
+            style = "give the the response in formatted in html only but remove the html tags"
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": style},
             {"role": "assistant", "content": "On what topic?"},
-            {"role": "user", "content": text}
+            {"role": "user", "content": prompt}
         ]
         responses = openai.ChatCompletion.create(model=self.model, messages=messages)
         content = responses.choices[0].message["content"]
@@ -66,7 +71,7 @@ class EmailSummary:
             if len(email_text) > 0:
                 logger.info("email summarization")
                 system_prompt = '''You are a language model that summarizes emails in 3-5 bullet points.'''
-                user_input = f'''Summarize the following in less than 100 words and only using 3-5 bullet points: {email_text}'''
+                user_input = f'''Please summarize the following email into 3-5 concise bullet points, highlighting the main points and key information: {email_text}'''
                 style = "Powerpoint slide with 3-5 bullet points with </br> at the end of each bullet point"
                 messages = [
                     {"role": "system", "content": system_prompt},
