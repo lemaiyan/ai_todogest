@@ -22,7 +22,7 @@ class Preprocess:
                 content for the following task: {text}? 
                 Please include the key steps involved, any important considerations, 
                 and useful tips to help me complete this task efficiently.'''
-        style = "give the the response in a bullet point format"
+        style = "give the the response in formatted in html only but remove the html tags"
         if type == "outlook":
             style = "give the the response in formatted in html only but remove the html tags"
         messages = [
